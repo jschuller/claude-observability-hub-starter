@@ -1,0 +1,32 @@
+{
+  "name": "@claude-observability/dashboard",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .vue,.js,.ts",
+    "format": "prettier --write 'src/**/*.{vue,js,ts}'"
+  },
+  "dependencies": {
+    "vue": "3.3.11"
+  },
+  "devDependencies": {
+    "@testing-library/vue": "8.0.1",
+    "@vitejs/plugin-vue": "4.5.2",
+    "@vitest/coverage-v8": "1.0.4",
+    "@vue/test-utils": "2.4.3",
+    "@typescript-eslint/eslint-plugin": "6.13.2",
+    "@typescript-eslint/parser": "6.13.2",
+    "eslint": "8.55.0",
+    "eslint-plugin-vue": "9.19.2",
+    "jsdom": "23.0.1",
+    "prettier": "3.1.1",
+    "typescript": "5.3.3",
+    "vite": "5.0.10",
+    "vitest": "1.0.4"
+  }
+}

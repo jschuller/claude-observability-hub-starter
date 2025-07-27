@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # Test database
+  test-db:
+    image: alpine:latest
+    command: mkdir -p /data
+    volumes:
+      - test-event-data:/data
+    
+  # Hub for integration tests
+  test-hub:
+    build: ./core/server
+    container_name: test-observability-hub
+    ports:
+      - "4001:4000"  # Different port for test
+    volumes:
+      - test-event-data:/data
+    environment:
+      - DATABASE_URL=sqlite:///data/test-events.db
+      - NODE_ENV=test
+      - MAX_BATCH_SIZE=100
+      - ENABLE_BULK_API=true
+      - LOG_LEVEL=debug
+    depends_on:
+      - test-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  # Python test runner
+  python-tests:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.python
+    volumes:
+      - ./templates:/app/templates
+      - ./requirements-dev.txt:/app/requirements-dev.txt
+      - ./pytest.ini:/app/pytest.ini
+      - test-results:/app/test-results
+    environment:
+      - CLAUDE_OBSERVABILITY_HUB=http://test-hub:4000
+    depends_on:
+      test-hub:
+        condition: service_healthy
+    command: >
+      sh -c "pip install -r requirements-dev.txt &&
+             pytest -v --cov --cov-report=xml:/app/test-results/python-coverage.xml"
+  
+  # Node/Bun test runner
+  node-tests:
+    build:
+      context: ./core/server
+      dockerfile: ../../tests/Dockerfile.node
+    volumes:
+      - ./core/server:/app
+      - test-results:/app/test-results
+    command: >
+      sh -c "bun install &&
+             bun test --coverage &&
+             cp coverage/coverage-final.json /app/test-results/node-coverage.json"
+  
+  # Vue test runner
+  vue-tests:
+    build:
+      context: ./core/dashboard
+      dockerfile: ../../tests/Dockerfile.vue
+    volumes:
+      - ./core/dashboard:/app
+      - test-results:/app/test-results
+    command: >
+      sh -c "npm install &&
+             npm run test:coverage &&
+             cp coverage/coverage-final.json /app/test-results/vue-coverage.json"
+  
+  # Integration test runner
+  integration-tests:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.integration
+    volumes:
+      - ./tests/integration:/app/tests
+      - test-results:/app/test-results
+    environment:
+      - HUB_URL=http://test-hub:4000
+      - DASHBOARD_URL=http://test-dashboard:5173
+    depends_on:
+      test-hub:
+        condition: service_healthy
+    command: >
+      sh -c "python -m pytest tests/ -v --junit-xml=/app/test-results/integration.xml"
+
+volumes:
+  test-event-data:
+    driver: local
+  test-results:
+    driver: local
+
+networks:
+  default:
+    name: observability-test-network

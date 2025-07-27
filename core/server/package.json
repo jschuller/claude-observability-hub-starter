@@ -1,0 +1,28 @@
+{
+  "name": "@claude-observability/hub",
+  "version": "0.1.0",
+  "description": "Event ingestion hub for Claude Code observability",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write 'src/**/*.ts'"
+  },
+  "dependencies": {
+    "bun": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "1.0.0",
+    "@vitest/coverage-v8": "1.0.4",
+    "@typescript-eslint/eslint-plugin": "6.13.2",
+    "@typescript-eslint/parser": "6.13.2",
+    "eslint": "8.55.0",
+    "prettier": "3.1.1",
+    "typescript": "5.3.3",
+    "vitest": "1.0.4"
+  }
+}

@@ -2,8 +2,13 @@
 
 > Real-time observability for Claude Code agents and sub-agents with minimal integration overhead
 
-[![Quick Start](https://img.shields.io/badge/setup-2%20minutes-brightgreen)](docs/quickstart.md)
+[![CI Status](https://github.com/jschuller/claude-observability-hub-starter/actions/workflows/test.yml/badge.svg)](https://github.com/jschuller/claude-observability-hub-starter/actions)
+[![Coverage](https://codecov.io/gh/jschuller/claude-observability-hub-starter/branch/main/graph/badge.svg)](https://codecov.io/gh/jschuller/claude-observability-hub-starter)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
+[![TypeScript](https://img.shields.io/badge/typescript-5.3.3-blue)](https://www.typescriptlang.org/)
+[![Vue](https://img.shields.io/badge/vue-3.3.11-brightgreen)](https://vuejs.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://www.docker.com/)
+[![DevContainer](https://img.shields.io/badge/devcontainer-ready-blue)](https://containers.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ## 🚀 Quick Start (2 minutes)
@@ -76,6 +81,19 @@ claude-observability-hub/
 │   └── test-load.py      # Load testing
 └── docker-compose.yml     # Local development
 ```
+
+### 🧪 Testing Quick Reference
+
+| Command | Description | Coverage Target |
+|---------|-------------|-----------------|
+| `./scripts/test-all.sh` | Run all tests across stacks | - |
+| `./scripts/test-python.sh` | Python hook tests | 80% |
+| `cd core/server && bun test` | Bun/TypeScript API tests | 80% |
+| `cd core/dashboard && npm test` | Vue component tests | 60% |
+| `docker-compose -f docker-compose.test.yml up` | Integration test environment | - |
+| `pytest tests/integration/ -v` | End-to-end tests | - |
+
+For detailed testing guide, see [TESTING.md](TESTING.md)
 
 ### Key Features
 - ✅ **2-file integration** per project
