@@ -249,21 +249,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Test DevContainer build
+      - name: Build DevContainer
         uses: devcontainers/ci@v0.3
         with:
           imageName: claude-observability-devcontainer
           cacheFrom: claude-observability-devcontainer
           push: never
+          
+      - name: Test DevContainer environment
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: claude-observability-devcontainer
           runCmd: |
-            # Verify tools are installed
+            # Verify all tools are installed and versions
+            echo "=== Tool Versions ==="
             python --version
-            bun --version
             node --version
+            npm --version
+            bun --version
+            sqlite3 --version
             
-            # Run basic tests
+            # Verify Python packages
+            echo -e "\n=== Python Packages ==="
+            pip list | grep -E "pytest|black|aiohttp|ipython"
+            
+            # Verify global npm packages
+            echo -e "\n=== NPM Global Packages ==="
+            npm list -g --depth=0
+            
+            # Run test suite inside container
+            echo -e "\n=== Running Tests ==="
             cd /workspaces/${{ github.event.repository.name }}
-            ./scripts/test-python.sh
+            ./scripts/test-all-devcontainer.sh
 
   coverage-report:
     name: Coverage Report

@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine as builder
+FROM node:20.10.0-alpine as builder
 
 WORKDIR /app
 
@@ -17,8 +17,8 @@ COPY src ./src
 # Build the app
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Production stage  
+FROM nginx:1.25.3-alpine
 
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html

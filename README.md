@@ -13,10 +13,17 @@
 
 ## 🚀 Quick Start (2 minutes)
 
+### One-Liner DevContainer Setup
+```bash
+# Clone, open in DevContainer, and run all tests
+git clone https://github.com/jschuller/claude-observability-hub-starter.git && cd claude-observability-hub-starter && devcontainer up --workspace-folder .
+```
+
+### Standard Setup
 ```bash
 # Clone and enter
-git clone https://github.com/YOUR_USERNAME/claude-observability-hub.git
-cd claude-observability-hub
+git clone https://github.com/jschuller/claude-observability-hub-starter.git
+cd claude-observability-hub-starter
 
 # Open in VS Code with DevContainer
 code .
@@ -27,6 +34,16 @@ docker-compose up -d
 
 # View dashboard
 open http://localhost:5173
+```
+
+### DevContainer CLI Setup
+```bash
+# Build and start DevContainer
+devcontainer build --workspace-folder .
+devcontainer up --workspace-folder .
+
+# Run tests inside container
+devcontainer exec --workspace-folder . bash scripts/test-all-devcontainer.sh
 ```
 
 ## 🎯 What is this?
@@ -92,6 +109,8 @@ claude-observability-hub/
 | `cd core/dashboard && npm test` | Vue component tests | 60% |
 | `docker-compose -f docker-compose.test.yml up` | Integration test environment | - |
 | `pytest tests/integration/ -v` | End-to-end tests | - |
+| `./scripts/test-multi-machine.sh` | Multi-machine simulation | - |
+| `devcontainer exec --workspace-folder . bash scripts/test-all-devcontainer.sh` | Test in DevContainer | - |
 
 For detailed testing guide, see [TESTING.md](TESTING.md)
 

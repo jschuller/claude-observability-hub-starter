@@ -1,0 +1,15 @@
+# Minimal agent container for multi-machine simulation
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy hook implementation
+COPY templates/hooks/.claude/hooks/send_event.py /app/
+
+# Install minimal dependencies
+RUN pip install --no-cache-dir aiohttp
+
+# Create test workspace
+RUN mkdir -p /workspace
+
+CMD ["python", "-u", "/workspace/simulate.py"]

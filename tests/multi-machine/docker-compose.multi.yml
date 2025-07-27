@@ -1,0 +1,126 @@
+version: '3.8'
+
+# Multi-machine simulation for testing distributed observability
+services:
+  # Central hub
+  hub:
+    build: ../../core/server
+    container_name: central-hub
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=sqlite:///data/events.db
+      - NODE_ENV=test
+      - MACHINE_ID=hub-central
+    volumes:
+      - hub-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - observability-net
+
+  # Machine 1 - Web Development Project
+  machine1:
+    build:
+      context: ../..
+      dockerfile: tests/multi-machine/Dockerfile.agent
+    container_name: machine-web-dev
+    environment:
+      - CLAUDE_OBSERVABILITY_HUB=http://hub:4000
+      - MACHINE_ID=machine-web-dev
+      - PROJECT_NAME=web-app
+      - SESSION_ID=session-web-${RANDOM}
+    depends_on:
+      hub:
+        condition: service_healthy
+    volumes:
+      - ./scenarios/web-dev:/workspace
+    networks:
+      - observability-net
+    command: python /workspace/simulate_web_dev.py
+
+  # Machine 2 - Data Science Project
+  machine2:
+    build:
+      context: ../..
+      dockerfile: tests/multi-machine/Dockerfile.agent
+    container_name: machine-data-science
+    environment:
+      - CLAUDE_OBSERVABILITY_HUB=http://hub:4000
+      - MACHINE_ID=machine-data-science
+      - PROJECT_NAME=ml-pipeline
+      - SESSION_ID=session-ml-${RANDOM}
+    depends_on:
+      hub:
+        condition: service_healthy
+    volumes:
+      - ./scenarios/data-science:/workspace
+    networks:
+      - observability-net
+    command: python /workspace/simulate_data_science.py
+
+  # Machine 3 - API Development with Subagents
+  machine3:
+    build:
+      context: ../..
+      dockerfile: tests/multi-machine/Dockerfile.agent
+    container_name: machine-api-dev
+    environment:
+      - CLAUDE_OBSERVABILITY_HUB=http://hub:4000
+      - MACHINE_ID=machine-api-dev
+      - PROJECT_NAME=api-service
+      - SESSION_ID=session-api-${RANDOM}
+    depends_on:
+      hub:
+        condition: service_healthy
+    volumes:
+      - ./scenarios/api-dev:/workspace
+    networks:
+      - observability-net
+    command: python /workspace/simulate_api_dev.py
+
+  # Machine 4 - Offline/Flaky Connection
+  machine4:
+    build:
+      context: ../..
+      dockerfile: tests/multi-machine/Dockerfile.agent
+    container_name: machine-offline
+    environment:
+      - CLAUDE_OBSERVABILITY_HUB=http://hub:4000
+      - MACHINE_ID=machine-offline
+      - PROJECT_NAME=mobile-app
+      - SESSION_ID=session-mobile-${RANDOM}
+      - SIMULATE_NETWORK_ISSUES=true
+    depends_on:
+      hub:
+        condition: service_healthy
+    volumes:
+      - ./scenarios/offline:/workspace
+    networks:
+      - observability-net
+    command: python /workspace/simulate_offline.py
+
+  # Dashboard to view all events
+  dashboard:
+    build: ../../core/dashboard
+    container_name: multi-machine-dashboard
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:4000
+      - VITE_WS_URL=ws://localhost:4000/stream
+    depends_on:
+      - hub
+    networks:
+      - observability-net
+
+volumes:
+  hub-data:
+    driver: local
+
+networks:
+  observability-net:
+    driver: bridge

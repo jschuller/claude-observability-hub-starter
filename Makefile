@@ -2,7 +2,8 @@
 # Convenience commands for development and testing
 
 .PHONY: help test test-all test-python test-bun test-vue test-integration \
-        coverage lint format docker-up docker-down docker-test clean install
+        coverage lint format docker-up docker-down docker-test clean install \
+        devcontainer-build devcontainer-up devcontainer-test multi-machine
 
 # Default target
 help:
@@ -20,6 +21,10 @@ help:
 	@echo "  make docker-up        Start services"
 	@echo "  make docker-down      Stop services"
 	@echo "  make docker-test      Run tests in Docker"
+	@echo "  make devcontainer-build Build DevContainer"
+	@echo "  make devcontainer-up  Start DevContainer"
+	@echo "  make devcontainer-test Test in DevContainer"
+	@echo "  make multi-machine    Run multi-machine simulation"
 	@echo "  make clean            Clean build artifacts"
 
 # Install dependencies
@@ -81,6 +86,20 @@ docker-test:
 	docker-compose -f docker-compose.test.yml run --rm python-tests
 	docker-compose -f docker-compose.test.yml run --rm node-tests
 	docker-compose -f docker-compose.test.yml run --rm vue-tests
+
+# DevContainer operations
+devcontainer-build:
+	devcontainer build --workspace-folder .
+
+devcontainer-up:
+	devcontainer up --workspace-folder .
+
+devcontainer-test:
+	devcontainer exec --workspace-folder . bash scripts/test-all-devcontainer.sh
+
+# Multi-machine simulation
+multi-machine:
+	./scripts/test-multi-machine.sh
 
 # Clean build artifacts
 clean:
